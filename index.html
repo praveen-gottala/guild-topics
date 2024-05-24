@@ -46,6 +46,10 @@
             text-align: center;
             margin-bottom: 20px;
         }
+
+        .vote-icon {
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -55,52 +59,75 @@
             <h1>Vote for a Topic</h1>
         </div>
         <div class="card">
-            <form id="voteForm">
+            <form id="topicForm">
                 <div class="form-group">
                     <label for="topic">Topic:</label>
                     <input type="text" class="form-control" id="topic" name="topic" required>
                 </div>
-                <div class="form-group">
-                    <label for="voterId">Voter ID:</label>
-                    <input type="text" class="form-control" id="voterId" name="voterId" required>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Vote</button>
+                <button type="submit" class="btn btn-primary btn-block">Add Topic</button>
             </form>
         </div>
         <div class="results card">
             <h2>Voting Results</h2>
-            <div id="results"></div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Topic</th>
+                        <th>Votes</th>
+                        <th>Vote</th>
+                    </tr>
+                </thead>
+                <tbody id="results"></tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        document.getElementById('voteForm').addEventListener('submit', function (event) {
+        document.getElementById('topicForm').addEventListener('submit', function (event) {
             event.preventDefault();
             const topic = document.getElementById('topic').value;
-            const voterId = document.getElementById('voterId').value;
 
-            fetch('https://still-scrubland-73827-585e80e5892f.herokuapp.com/vote', {
+            fetch('http://localhost:3000/topic', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ topicId: topic, voterIdHash: voterId })
+                body: JSON.stringify({ topic })
             })
-                .then(response => response.text())
+                .then(response => response.json())
                 .then(data => {
-                    alert(data);
+                    alert('Topic added!');
                     loadResults();
                 })
                 .catch(error => console.error('Error:', error));
         });
 
         function loadResults() {
-            fetch('https://still-scrubland-73827-585e80e5892f.herokuapp.com/results')
+            fetch('http://localhost:3000/results')
                 .then(response => response.json())
                 .then(data => {
                     const resultsDiv = document.getElementById('results');
                     resultsDiv.innerHTML = '';
                     data.forEach(result => {
-                        resultsDiv.innerHTML += `<p>${result.topic}: ${result.vote_count} votes</p>`;
+                        resultsDiv.innerHTML += `
+                        <tr>
+                            <td>${result.topic}</td>
+                            <td>${result.votes}</td>
+                            <td><span class="vote-icon" onclick="vote(${result.id})">&#128077;</span></td>
+                        </tr>
+                    `;
                     });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function vote(topicId) {
+            fetch('http://localhost:3000/vote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ topicId })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    loadResults();
                 })
                 .catch(error => console.error('Error:', error));
         }
