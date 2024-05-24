@@ -96,13 +96,14 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    alert('Topic added!');
+                    // alert('Topic added!');
                     loadResults();
                 })
                 .catch(error => console.error('Error:', error));
         });
 
         function loadResults() {
+            console.log("Loading results...")
             fetch(host + '/results')
                 .then(response => response.json())
                 .then(data => {
