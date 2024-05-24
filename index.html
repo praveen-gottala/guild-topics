@@ -3,22 +3,75 @@
 
 <head>
     <title>Anonymous Voting</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f7f7f7;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group label {
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: #4caf50;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .results h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Vote for a Topic</h1>
-    <form id="voteForm">
-        <label for="topic">Topic:</label>
-        <input type="text" id="topic" name="topic" required>
-        <br>
-        <label for="voterId">Voter ID:</label>
-        <input type="text" id="voterId" name="voterId" required>
-        <br>
-        <button type="submit">Vote</button>
-    </form>
-
-    <h2>Voting Results</h2>
-    <div id="results"></div>
+    <div class="container">
+        <div class="header">
+            <h1>Vote for a Topic</h1>
+        </div>
+        <div class="card">
+            <form id="voteForm">
+                <div class="form-group">
+                    <label for="topic">Topic:</label>
+                    <input type="text" class="form-control" id="topic" name="topic" required>
+                </div>
+                <div class="form-group">
+                    <label for="voterId">Voter ID:</label>
+                    <input type="text" class="form-control" id="voterId" name="voterId" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Vote</button>
+            </form>
+        </div>
+        <div class="results card">
+            <h2>Voting Results</h2>
+            <div id="results"></div>
+        </div>
+    </div>
 
     <script>
         document.getElementById('voteForm').addEventListener('submit', function (event) {
@@ -26,28 +79,30 @@
             const topic = document.getElementById('topic').value;
             const voterId = document.getElementById('voterId').value;
 
-            fetch('/vote', {
+            fetch('https://still-scrubland-73827-585e80e5892f.herokuapp.com/vote', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ topic, voterId })
+                body: JSON.stringify({ topicId: topic, voterIdHash: voterId })
             })
                 .then(response => response.text())
                 .then(data => {
                     alert(data);
                     loadResults();
-                });
+                })
+                .catch(error => console.error('Error:', error));
         });
 
         function loadResults() {
-            fetch('/results')
+            fetch('https://still-scrubland-73827-585e80e5892f.herokuapp.com/results')
                 .then(response => response.json())
                 .then(data => {
                     const resultsDiv = document.getElementById('results');
                     resultsDiv.innerHTML = '';
-                    for (const [topic, count] of Object.entries(data)) {
-                        resultsDiv.innerHTML += `<p>${topic}: ${count} votes</p>`;
-                    }
-                });
+                    data.forEach(result => {
+                        resultsDiv.innerHTML += `<p>${result.topic}: ${result.vote_count} votes</p>`;
+                    });
+                })
+                .catch(error => console.error('Error:', error));
         }
 
         loadResults();
