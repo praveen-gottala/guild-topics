@@ -86,8 +86,10 @@
         document.getElementById('topicForm').addEventListener('submit', function (event) {
             event.preventDefault();
             const topic = document.getElementById('topic').value;
+            const host = "https://still-scrubland-73827-585e80e5892f.herokuapp.com";
+            // const host = "http://localhost:3000";
 
-            fetch('http://localhost:3000/topic', {
+            fetch(host + '/topic', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ topic })
@@ -101,7 +103,7 @@
         });
 
         function loadResults() {
-            fetch('http://localhost:3000/results')
+            fetch(host + '/results')
                 .then(response => response.json())
                 .then(data => {
                     const resultsDiv = document.getElementById('results');
@@ -120,7 +122,7 @@
         }
 
         function vote(topicId) {
-            fetch('http://localhost:3000/vote', {
+            fetch(host + '/vote', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ topicId })
