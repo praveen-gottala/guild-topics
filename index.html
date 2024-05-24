@@ -50,6 +50,29 @@
         .vote-icon {
             cursor: pointer;
         }
+
+        .styled-select {
+            width: 60%;
+            height: 34px;
+            overflow: hidden;
+            background: #f7f7f7;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        }
+
+        .styled-select select {
+            width: 100%;
+            height: 100%;
+            padding: 5px 10px;
+            border: none;
+            background: none;
+            box-shadow: none;
+            outline: none;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #555;
+        }
     </style>
 </head>
 
@@ -64,6 +87,27 @@
                     <label for="topic">Topic:</label>
                     <input type="text" class="form-control" id="topic" name="topic" required>
                 </div>
+                <div class="form-group">
+                    <label for="speaker">Speaker:</label>
+                    <div class="styled-select">
+                        <select class="form-control" id="speaker" name="speaker" required>
+                            <option value="unknown">Unknown</option>
+                            <option value="Aniket">Aniket Kumar</option>
+                            <option value="Ashis">Ashis Panigrahi</option>
+                            <option value="Dharanidhar">Dharanidhar Vuppu</option>
+                            <option value="Luke">Luke Johnson</option>
+                            <option value="Mahalakshmi">Mahalakshmi Ramu</option>
+                            <option value="Praveen">Praveen Gottala</option>
+                            <option value="Ravi">Ravi Chauhan</option>
+                            <option value="Shweta">Shweta Balgujar</option>
+                            <option value="Sindhuja">Sindhuja Vankadari</option>
+                            <option value="Suman">Suman Dey</option>
+                            <option value="Uday">Uday Chinthakunta</option>
+                            <option value="Vijayalakshmi">Vijayalakshmi Darma</option>
+
+                        </select>
+                    </div>
+                </div>
                 <button type="submit" class="btn btn-primary btn-block">Add Topic</button>
             </form>
         </div>
@@ -74,6 +118,7 @@
                     <tr>
                         <th>Topic</th>
                         <th>Votes</th>
+                        <th>Speaker</th>
                         <th>Vote</th>
                     </tr>
                 </thead>
@@ -83,27 +128,28 @@
     </div>
 
     <script>
+        const host = "https://still-scrubland-73827-585e80e5892f.herokuapp.com";
+        // const host = "http://localhost:3000";
+
         document.getElementById('topicForm').addEventListener('submit', function (event) {
             event.preventDefault();
             const topic = document.getElementById('topic').value;
-            const host = "https://still-scrubland-73827-585e80e5892f.herokuapp.com";
-            // const host = "http://localhost:3000";
+            const speaker = document.getElementById('speaker').value;
 
             fetch(host + '/topic', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ topic })
+                body: JSON.stringify({ topic, speaker })
             })
                 .then(response => response.json())
                 .then(data => {
-                    // alert('Topic added!');
                     loadResults();
                 })
                 .catch(error => console.error('Error:', error));
         });
 
         function loadResults() {
-            console.log("Loading results...")
+            // console.log("Loading results...");
             fetch(host + '/results')
                 .then(response => response.json())
                 .then(data => {
@@ -114,6 +160,25 @@
                         <tr>
                             <td>${result.topic}</td>
                             <td>${result.votes}</td>
+                            <td>
+                                <div class="styled-select">
+                                    <select onchange="updateSpeaker(${result.id}, this.value)">
+                                        <option value="unknown" ${result.speaker === 'unknown' ? 'selected' : ''}>Unknown</option>
+                                        <option value="Aniket" ${result.speaker === 'Aniket' ? 'selected' : ''}>Aniket Kumar</option>
+                                        <option value="Ashis" ${result.speaker === 'Ashis' ? 'selected' : ''}>Ashis Panigrahi</option>
+                                        <option value="Dharanidhar" ${result.speaker === 'Dharanidhar' ? 'selected' : ''}>Dharanidhar Vuppu</option>
+                                        <option value="Luke" ${result.speaker === 'Luke' ? 'selected' : ''}>Luke Johnson</option>
+                                        <option value="Mahalakshmi" ${result.speaker === 'Mahalakshmi' ? 'selected' : ''}>Mahalakshmi Ramu</option>
+                                        <option value="Praveen" ${result.speaker === 'Praveen' ? 'selected' : ''}>Praveen Gottala</option>
+                                        <option value="Ravi" ${result.speaker === 'Ravi' ? 'selected' : ''}>Ravi Chauhan</option>
+                                        <option value="Shweta" ${result.speaker === 'Shweta' ? 'selected' : ''}>Shweta Balgujar</option>
+                                        <option value="Sindhuja" ${result.speaker === 'Sindhuja' ? 'selected' : ''}>Sindhuja Vankadari</option>
+                                        <option value="Suman" ${result.speaker === 'Suman' ? 'selected' : ''}>Suman Dey</option>
+                                        <option value="Uday" ${result.speaker === 'Uday' ? 'selected' : ''}>Uday Chinthakunta</option>
+                                        <option value="Vijayalakshmi" ${result.speaker === 'Vijayalakshmi' ? 'selected' : ''}>Vijayalakshmi Darma</option>
+                                    </select>
+                                </div>
+                            </td>
                             <td><span class="vote-icon" onclick="vote(${result.id})">&#128077;</span></td>
                         </tr>
                     `;
@@ -130,6 +195,21 @@
             })
                 .then(response => response.json())
                 .then(data => {
+                    loadResults();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateSpeaker(topicId, speaker) {
+            fetch(host + '/update-speaker', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ topicId, speaker })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Speaker updated:', data);
+
                     loadResults();
                 })
                 .catch(error => console.error('Error:', error));
