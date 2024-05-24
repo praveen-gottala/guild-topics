@@ -2,12 +2,56 @@
 <html>
 
 <head>
-    <title>My Website</title>
+    <title>Anonymous Voting</title>
 </head>
 
 <body>
-    <h1>Welcome to My GitHub Pages Site</h1>
-    <p>This is a simple static site hosted on GitHub Pages.</p>
+    <h1>Vote for a Topic</h1>
+    <form id="voteForm">
+        <label for="topic">Topic:</label>
+        <input type="text" id="topic" name="topic" required>
+        <br>
+        <label for="voterId">Voter ID:</label>
+        <input type="text" id="voterId" name="voterId" required>
+        <br>
+        <button type="submit">Vote</button>
+    </form>
+
+    <h2>Voting Results</h2>
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('voteForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const topic = document.getElementById('topic').value;
+            const voterId = document.getElementById('voterId').value;
+
+            fetch('/vote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ topic, voterId })
+            })
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    loadResults();
+                });
+        });
+
+        function loadResults() {
+            fetch('/results')
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = '';
+                    for (const [topic, count] of Object.entries(data)) {
+                        resultsDiv.innerHTML += `<p>${topic}: ${count} votes</p>`;
+                    }
+                });
+        }
+
+        loadResults();
+    </script>
 </body>
 
 </html>
